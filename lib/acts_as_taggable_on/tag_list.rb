@@ -18,13 +18,14 @@ module ActsAsTaggableOn
     def self.from(string)
       glue   = delimiter.ends_with?(" ") ? delimiter : "#{delimiter} "
       string = string.join(glue) if string.respond_to?(:join)
-
+      
       new.tap do |tag_list|
         string = string.to_s.dup
 
         # Parse the quoted tags
-        string.gsub!(/(\A|#{delimiter})\s*"(.*?)"\s*(#{delimiter}\s*|\z)/) { tag_list << $2; $3 }
-        string.gsub!(/(\A|#{delimiter})\s*'(.*?)'\s*(#{delimiter}\s*|\z)/) { tag_list << $2; $3 }
+        string.gsub!(/\s*("|')(.*?)\1#{delimiter}\s*/) { tag_list << $2; delimiter }
+        string.gsub!(/#{delimiter}\s*("|')(.*?)\1\s*/) { tag_list << $2; delimiter }
+        string.gsub!(/\s*("|')(.*?)\1\s*\Z/)           { tag_list << $2; delimiter }
 
         tag_list.add(string.split(delimiter))
       end
